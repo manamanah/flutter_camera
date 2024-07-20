@@ -1237,6 +1237,11 @@ NSString *const errorMethod = @"error";
       recommendedVideoSettingsForAssetWriterWithFileType:AVFileTypeMPEG4
                                                forOutput:_captureVideoOutput] mutableCopy];
 
+  // iPad +11 supports H264
+  // AVVideoSettings.h: set AVVideoCodecKey => also define AVVideoWidthKey + Height (NSNumber)
+  // or profileLevel
+  videoSettings[AVVideoCodecKey] = AVVideoCodecTypeH264;
+
   if (_mediaSettings.videoBitrate || _mediaSettings.framesPerSecond) {
     NSMutableDictionary *compressionProperties = [[NSMutableDictionary alloc] init];
 
@@ -1248,6 +1253,8 @@ NSString *const errorMethod = @"error";
       compressionProperties[AVVideoExpectedSourceFrameRateKey] = _mediaSettings.framesPerSecond;
     }
 
+    // supports all iPads (e.g. iPad 1 does not have High level, release 2010)
+    compressionProperties[AVVideoProfileLevelKey] = AVVideoProfileLevelH264MainAutoLevel;
     videoSettings[AVVideoCompressionPropertiesKey] = compressionProperties;
   }
 
