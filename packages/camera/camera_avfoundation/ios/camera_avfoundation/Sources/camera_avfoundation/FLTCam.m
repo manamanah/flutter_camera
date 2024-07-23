@@ -1233,9 +1233,30 @@ NSString *const errorMethod = @"error";
     return NO;
   }
 
-  NSMutableDictionary<NSString *, id> *videoSettings = [[_mediaSettingsAVWrapper
-      recommendedVideoSettingsForAssetWriterWithFileType:AVFileTypeMPEG4
-                                               forOutput:_captureVideoOutput] mutableCopy];
+  // set smaller and larger resolution value
+  double smallerSize = 0;
+  double largerSize = 0;
+  if (_previewSize.width > _previewSize.height) {
+    largerSize = _previewSize.width;
+    smallerSize = _previewSize.height;
+  } else {
+    largerSize = _previewSize.height;
+    smallerSize = _previewSize.width;
+  }
+
+  NSMutableDictionary<NSString *, id> *videoSettings = [[NSMutableDictionary alloc] init];
+
+  // iPad +11 supports H264
+  // AVVideoSettings.h: set AVVideoCodecKey => also define AVVideoWidthKey + Height (NSNumber)
+  // or sourceFormatHint
+  videoSettings[AVVideoCodecKey] = AVVideoCodecTypeH264;
+  if (UIDeviceOrientationIsLandscape(_deviceOrientation)) {
+    videoSettings[AVVideoWidthKey] = [NSNumber numberWithDouble:largerSize];
+    videoSettings[AVVideoHeightKey] = [NSNumber numberWithDouble:smallerSize];
+  } else {
+    videoSettings[AVVideoWidthKey] = [NSNumber numberWithDouble:smallerSize];
+    videoSettings[AVVideoHeightKey] = [NSNumber numberWithDouble:largerSize];
+  }
 
   if (_mediaSettings.videoBitrate || _mediaSettings.framesPerSecond) {
     NSMutableDictionary *compressionProperties = [[NSMutableDictionary alloc] init];
